@@ -1,0 +1,14 @@
+name: Pheatures
+version: '${version}'
+main: phewitch.pheatures.Pheatures
+api-version: 1.20
+
+commands:
+  tpa:
+    description: Sends a TPA request for you to teleport to another player
+  tpahere:
+      description: Sends a TPA request for another player to teleport to you
+  tpaccept:
+      description: Accept a TPA request
+  tpdeny:
+        description: Denies a TPA request
