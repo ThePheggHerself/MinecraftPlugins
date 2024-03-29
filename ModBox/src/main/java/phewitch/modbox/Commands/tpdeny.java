@@ -1,4 +1,4 @@
-package phewitch.pheatures.commands;
+package phewitch.modbox.Commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -7,8 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import phewitch.pheatures.DataClasses.CustomCommand;
-import phewitch.pheatures.DataClasses.TPRequest;
+import phewitch.modbox.Classes.Data.TPRequest;
 
 //@ICommandInfo(
 //        Name = "tpdeny",

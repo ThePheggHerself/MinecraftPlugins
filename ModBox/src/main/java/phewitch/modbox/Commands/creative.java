@@ -1,11 +1,11 @@
-package phewitch.pheatures.commands;
+package phewitch.modbox.Commands;
 
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import phewitch.pheatures.DataClasses.CustomCommand;
+import phewitch.modbox.Commands.CommandBase.CustomCommand;
 
 public class creative extends CustomCommand {
     public creative(@NotNull String name) {

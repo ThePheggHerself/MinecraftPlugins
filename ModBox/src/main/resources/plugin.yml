@@ -1,6 +1,6 @@
-name: Pheatures
+name: ModBox
 version: '${version}'
-main: phewitch.pheatures.Pheatures
+main: phewitch.modbox.ModBox
 api-version: 1.20
 
 commands:
@@ -16,3 +16,5 @@ commands:
     description: "Test command"
   creative:
     description: "Sets yourself to Creative"
+  ban:
+    description: "Bans a user from your server"

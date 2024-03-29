@@ -1,4 +1,4 @@
-package phewitch.pheatures.commands;
+package phewitch.modbox.Commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -7,9 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import phewitch.pheatures.DataClasses.CustomCommand;
+import phewitch.modbox.Commands.CommandBase.CustomCommand;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class testing extends CustomCommand {
@@ -42,17 +41,6 @@ public class testing extends CustomCommand {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(args.length == 1){
-            return Bukkit.getOnlinePlayers().stream().map(player -> player.getDisplayName()).toList();
-        }
-        else {
-            return new ArrayList<String>() {{
-                add("1");
-                add("5");
-                add("10");
-                add("50");
-                add("100");
-            }};
-        }
+        return super.onTabComplete(sender, command, label, args);
     }
 }

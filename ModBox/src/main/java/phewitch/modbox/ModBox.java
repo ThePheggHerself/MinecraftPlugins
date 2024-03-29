@@ -1,4 +1,4 @@
-package phewitch.pheatures;
+package phewitch.modbox;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
@@ -10,20 +10,24 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import phewitch.pheatures.DataClasses.CustomCommand;
-import phewitch.pheatures.Handlers.ChatAndNotifications;
-import phewitch.pheatures.Handlers.PluginMessages;
-import phewitch.pheatures.Handlers.UpdateTablist;
+import phewitch.modbox.Commands.CommandBase.CustomCommand;
+import phewitch.modbox.Commands.CommandBase.IPlayerOnlyCommand;
+import phewitch.modbox.Classes.SqlManager;
+import phewitch.modbox.Commands.ban;
+import phewitch.modbox.EventListeners.ChatNotifications;
+import phewitch.modbox.EventListeners.CommandEventListener;
+import phewitch.modbox.EventListeners.PluginMessages;
+import phewitch.modbox.EventListeners.UpdateTablist;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public final class Pheatures extends JavaPlugin {
-    public static Pheatures Instance;
+public final class ModBox extends JavaPlugin {
+    public static ModBox Instance;
     public static LuckPerms LuckPermsAPI;
 
     public static Map<String, CustomCommand> CommandMap = new HashMap<>();
@@ -46,34 +50,25 @@ public final class Pheatures extends JavaPlugin {
     public void onEnable() {
         Instance = this;
         var logger = this.getLogger();
-        logger.info("Loading Pheatures plugin");
-
         @Nullable RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             LuckPermsAPI = provider.getProvider();
         }
 
-        String response = "";
-
-        logger.info("Loading config");
-        RegisterConfig();
-
-        logger.info("Checking SQL Connection");
-        if (!CheckSQL()) {
+        logger.info("Checking config and SQL Connection");
+        if (!RegisterConfig()) {
             logger.warning("Unable to connect to database. Plugin will not be loaded");
             setEnabled(false);
             return;
         }
 
+        var banCmd = new ban("ban");
+
+        this.getCommand("ban").setExecutor(banCmd);
+        this.getCommand("ban").setTabCompleter(banCmd);
+
         logger.info("Registering plugin message channels");
         if (!RegisterPluginChannels()) {
-            logger.warning("Unable to register commands. Plugin will not be loaded");
-            setEnabled(false);
-            return;
-        }
-
-        logger.info("Registering commands");
-        if (!RegisterCommands()) {
             logger.warning("Unable to register commands. Plugin will not be loaded");
             setEnabled(false);
             return;
@@ -86,9 +81,8 @@ public final class Pheatures extends JavaPlugin {
             return;
         }
 
-        new UpdateTablist();
-
-
+        BukkitScheduler scheduler = Bukkit.getScheduler();
+        scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 20L  /*<-- the initial delay */, 20L * 3 /*<-- the interval */);
     }
 
     @Override
@@ -96,46 +90,45 @@ public final class Pheatures extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String label, @NotNull String[] args) {
-        if (!CommandMap.containsKey(baseCommand.getName())) {
-            try {
-                getLogger().info("Registering command: " + baseCommand.getName());
-                var customCommand = (CustomCommand) this.getClassLoader().loadClass("phewitch.pheatures.commands." + baseCommand.getName())
-                        .getDeclaredConstructor(String.class).newInstance(baseCommand.getName());
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
+        var command = getCustomCommand(sender, baseCommand, alias, args);
 
-                CommandMap.put(baseCommand.getName(), customCommand);
-                baseCommand.register(Bukkit.getCommandMap());
+        return super.onTabComplete(sender, command, alias, args);
+    }
 
-            } catch (Exception e) {
-                this.getLogger().warning(e.toString());
-                return false;
-            }
-        }
+    @Override
+    public boolean onCommand(final CommandSender sender, final Command baseCommand, final String label, final String[] args) {
+        getLogger().info("1111111111111111");
 
-        getLogger().info(CommandMap.containsKey(baseCommand.getName()) + " ");
+        var command = getCustomCommand(sender, baseCommand, label, args);
 
-        var command = CommandMap.get(baseCommand.getName());
+        getLogger().info("AAAAAA");
 
-        getLogger().info("AAAAAAAAAAAA");
-
-        if (command.RequirePlayer && !(sender instanceof Player plr)) {
+        if ((command instanceof IPlayerOnlyCommand) && !(sender instanceof Player plr)) {
             sender.sendMessage(Component.text("Only players can run this command").color(NamedTextColor.RED));
             return false;
         }
 
-        getLogger().info("BBBBB");
+        getLogger().info("BBBBBBBB");
 
         var perm = command.getPermission();
         if (perm != null && !sender.hasPermission(perm)) {
             sender.sendMessage(Component.text("You do not have permission to run this command").color(NamedTextColor.RED));
             return false;
         }
+
+        getLogger().info("CCCCCCCCCC");
+
         var msg = command.hasValidArguments(args);
+
+        getLogger().info("DDDDDDDDD");
 
         if (msg != null && !msg.isEmpty()) {
             sender.sendMessage(Component.text(msg).color(NamedTextColor.YELLOW));
             return false;
         }
+
+        getLogger().info("EEEEEEEEEE");
 
         return command.onCommand(sender, baseCommand, label, args);
     }
@@ -143,26 +136,21 @@ public final class Pheatures extends JavaPlugin {
     public boolean RegisterConfig() {
         var config = this.getConfig();
 
-        if (config.contains("plugin-version"))
-            return true;
-
-        config.options().copyDefaults(true);
-        saveConfig();
-        return true;
-    }
-
-    public boolean CheckSQL() {
-        try {
-            try (Connection conn = GetSQLConnection().getConnection()) {
-                if (!conn.isValid(5)) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace(); // This should be replaced with a propper logging solution. don't do this.
-            return false;
+        if (!config.contains("plugin-version")) {
+            config.options().copyDefaults(true);
+            saveConfig();
         }
+
+        var dbConfig = config.getConfigurationSection("database").getValues(false);
+
+        new SqlManager(dbConfig.get("host").toString(),
+                Integer.parseInt(dbConfig.get("port").toString()),
+                dbConfig.get("database").toString(),
+                dbConfig.get("user").toString(),
+                dbConfig.get("password").toString()
+                );
+
+        return SqlManager.Instance.checkConnection();
     }
 
     public boolean RegisterPluginChannels() {
@@ -178,20 +166,38 @@ public final class Pheatures extends JavaPlugin {
         return true;
     }
 
-    public boolean RegisterCommands() {
+    public CustomCommand getCustomCommand(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
         try {
-            var path = "phewitch.pheatures.commands.";
-            var list = PluginCommandYamlParser.parse(this);
 
-            return true;
+            if (CommandMap.containsKey(baseCommand.getName()))
+                return CommandMap.get(baseCommand.getName());
+
+            try {
+                getLogger().info("Registering command: " + baseCommand.getName());
+                var customCommand = (CustomCommand) this.getClassLoader().loadClass("phewitch.modbox.Commands." + baseCommand.getName())
+                        .getDeclaredConstructor(String.class).newInstance(baseCommand.getName());
+
+                CommandMap.put(baseCommand.getName(), customCommand);
+                baseCommand.register(Bukkit.getCommandMap());
+                var cmd = getCommand(baseCommand.getName());
+                cmd.setTabCompleter(customCommand);
+                cmd.setExecutor(this::onCommand);
+
+                return customCommand;
+
+            } catch (Exception e) {
+                this.getLogger().warning(e.toString());
+                return null;
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            this.getLogger().warning(e.toString());
+            return null;
         }
     }
 
     public boolean RegisterEvents() {
-        getServer().getPluginManager().registerEvents(new ChatAndNotifications(), this);
+        getServer().getPluginManager().registerEvents(new ChatNotifications(), this);
+        getServer().getPluginManager().registerEvents(new CommandEventListener(), this);
         return true;
     }
 

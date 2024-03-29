@@ -1,4 +1,4 @@
-package phewitch.pheatures.DataClasses;
+package phewitch.modbox.Classes.Data;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

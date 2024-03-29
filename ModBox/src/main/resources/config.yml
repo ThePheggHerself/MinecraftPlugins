@@ -6,3 +6,6 @@ database:
   database: db # name of your database. A database server can contain multiple databases
   user: username
   password: pass
+
+server-name: "Survival"
+staffplusplus-compatibility: true

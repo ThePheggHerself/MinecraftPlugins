@@ -104,6 +104,12 @@ public class VelocityTesting {
             ChatMessage(event, origin);
         else if (event.getIdentifier() == Channels.Announcement)
             Announcement(event, origin);
+        else if(event.getIdentifier() == Channels.ServerStatus){
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF(origin.getServer().getServerInfo().getName());
+
+            origin.sendPluginMessage(Channels.ServerStatus, out.toByteArray());
+        }
     }
 
     public void ChatMessage(PluginMessageEvent event, ServerConnection origin) {
