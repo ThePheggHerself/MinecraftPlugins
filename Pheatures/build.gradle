@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
 
 
     compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'

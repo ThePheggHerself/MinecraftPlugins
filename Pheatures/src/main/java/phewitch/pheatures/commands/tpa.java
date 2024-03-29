@@ -1,4 +1,4 @@
-package phewitch.pheatures.Commands;
+package phewitch.pheatures.commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -6,17 +6,28 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import phewitch.pheatures.DataClasses.CustomCommand;
 import phewitch.pheatures.DataClasses.TPRequest;
 import phewitch.pheatures.Pheatures;
 
-public class CmdTPAHere implements CommandExecutor {
+//@ICommandInfo(
+//        Name = "tpa",
+//        Description = "Sends a request to teleport to another player",
+//        Permission = "",
+//        Alias = {}
+//)
+public class tpa {
 
-    @Override
+    //protected tpa(@NotNull String name) {
+    //    super(name);
+    //}
+
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        Pheatures.Instance.getLogger().info("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+
         if (sender instanceof Player plr) {
 
             if (args.length < 1) {
@@ -41,12 +52,12 @@ public class CmdTPAHere implements CommandExecutor {
                 return false;
             }
 
-            var request = new TPRequest(plr, target, TPRequest.RequestType.TargetToSender);
+            var request = new TPRequest(plr, target, TPRequest.RequestType.SenderToTarget);
             TPRequest.PendingRequests.put(target.getUniqueId(), request);
 
             var tpaMessage = Component.text()
                     .append(plr.displayName().color(NamedTextColor.GOLD))
-                    .append(Component.text(" wants to you to TP to them!\nYou have 30 seconds to ").color(NamedTextColor.YELLOW))
+                    .append(Component.text(" wants to TP to you!\nYou have 30 seconds to ").color(NamedTextColor.YELLOW))
                     .append(Component.text("Accept")
                             .color(NamedTextColor.GREEN)
                             .hoverEvent(HoverEvent.showText(Component.text("Runs /tpaccept")))
@@ -61,7 +72,7 @@ public class CmdTPAHere implements CommandExecutor {
             plr.sendMessage(Component.text("Request sent!").color(NamedTextColor.YELLOW));
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(Pheatures.Instance, () -> {
-                if(TPRequest.PendingRequests.containsKey(target.getUniqueId())) {
+                if (TPRequest.PendingRequests.containsKey(target.getUniqueId())) {
                     TPRequest.PendingRequests.remove(target.getUniqueId());
 
                     var msg = Component.text("Your pending TPA request has timed out").color(NamedTextColor.RED);

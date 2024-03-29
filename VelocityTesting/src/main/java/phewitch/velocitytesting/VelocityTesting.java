@@ -8,6 +8,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
@@ -15,44 +16,75 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.Yaml;
 import phewitch.velocitytesting.Commands.CmdAnnounce;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Objects;
 
 
 @Plugin(
-        id = "velocitytesting",
-        name = "VelocityTesting",
+        id = "velocitypheatures",
+        name = "VelocityPheatures",
         version = BuildConstants.VERSION
 )
 public class VelocityTesting {
-    public static final MinecraftChannelIdentifier IdfAnnouncement = MinecraftChannelIdentifier.from("phewitch:velocityannouncements");
-    public static final MinecraftChannelIdentifier IdfGlobalChat = MinecraftChannelIdentifier.from("phewitch:chatmessage");
-    public static final MinecraftChannelIdentifier IdfServerStatus = MinecraftChannelIdentifier.from("phewitch:serverstatus");
+    public static class Channels{
+        public static final MinecraftChannelIdentifier Announcement = MinecraftChannelIdentifier.from("phewitch:velocityannouncements");
+        public static final MinecraftChannelIdentifier GlobalChat = MinecraftChannelIdentifier.from("phewitch:chatmessage");
+        public static final MinecraftChannelIdentifier ServerStatus = MinecraftChannelIdentifier.from("phewitch:serverstatus");
+    }
+
     public static ProxyServer server;
     public static Logger logger;
-    //public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("bungeecord");
+    public static YamlDocument config;
 
     @Inject
-    public VelocityTesting(ProxyServer server, Logger logger) {
+    public VelocityTesting(ProxyServer server, Logger logger, @DataDirectory Path directory) {
         this.server = server;
         this.logger = logger;
+
+        try{
+            config = YamlDocument.create(new File(directory.toFile(), "config.yml"),
+                    Objects.requireNonNull(getClass().getResourceAsStream("/config.yml")),
+                    GeneralSettings.DEFAULT,
+                    LoaderSettings.builder().setAutoUpdate(true).build(),
+                    DumperSettings.DEFAULT,
+                    UpdaterSettings.builder().setVersioning(new BasicVersioning("file-version"))
+                            .setOptionSorting(UpdaterSettings.OptionSorting.SORT_BY_DEFAULTS).build());
+
+            config.update();
+            config.save();
+        }
+        catch (Exception e){
+            logger.error("Could not create config file. Plugin will shut down!\n" + e.toString());
+            server.getPluginManager().getPlugin("velocitypheatures").ifPresent(pluginContainer -> pluginContainer.getExecutorService().shutdown());
+        }
 
         logger.info("Hello there! I made my first plugin with Velocity.");
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        server.getChannelRegistrar().register(IdfAnnouncement);
-        server.getChannelRegistrar().register(IdfGlobalChat);
-        server.getChannelRegistrar().register(IdfServerStatus);
+        server.getChannelRegistrar().register(Channels.Announcement);
+        server.getChannelRegistrar().register(Channels.GlobalChat);
+        server.getChannelRegistrar().register(Channels.ServerStatus);
 
         RegisterCommands();
     }
-
     public void RegisterCommands(){
         var cmdManager = server.getCommandManager();
 
@@ -68,9 +100,9 @@ public class VelocityTesting {
         }
         ServerConnection origin = (ServerConnection) event.getSource();
         // Ensure the identifier is what you expect before trying to handle the data
-        if (event.getIdentifier() == IdfGlobalChat)
+        if (event.getIdentifier() == Channels.GlobalChat)
             ChatMessage(event, origin);
-        else if (event.getIdentifier() == IdfAnnouncement)
+        else if (event.getIdentifier() == Channels.Announcement)
             Announcement(event, origin);
     }
 
@@ -89,7 +121,7 @@ public class VelocityTesting {
             var sInfo = server.getServerInfo();
 
             if (sInfo.getName() != originInfo.getName()) {
-                var success = server.sendPluginMessage(IdfGlobalChat, out.toByteArray());
+                var success = server.sendPluginMessage(Channels.GlobalChat, out.toByteArray());
             }
         }
     }
@@ -107,7 +139,7 @@ public class VelocityTesting {
         out.writeUTF(JSONComponentSerializer.json().serialize(msg.build()));
 
         for (RegisteredServer server : server.getAllServers()) {
-            var success = server.sendPluginMessage(IdfAnnouncement, out.toByteArray());
+            var success = server.sendPluginMessage(Channels.Announcement, out.toByteArray());
         }
     }
 

@@ -1,18 +1,23 @@
-package phewitch.pheatures.Commands;
+package phewitch.pheatures.commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import phewitch.pheatures.DataClasses.CustomCommand;
 import phewitch.pheatures.DataClasses.TPRequest;
-import phewitch.pheatures.Pheatures;
 
-public class CmdTPDeny implements CommandExecutor {
-    @Override
+//@ICommandInfo(
+//        Name = "tpdeny",
+//        Description = "Denies a pending TP request",
+//        Permission = "",
+//        Alias = {}
+//)
+public class tpdeny {
+
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player plr) {
             if (!TPRequest.PendingRequests.containsKey(plr.getUniqueId())) {

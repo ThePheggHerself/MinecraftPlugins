@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'eclipse'
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1"
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'phewitch'
@@ -16,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    implementation "dev.dejvokep:boosted-yaml:1.3"
     compileOnly "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
     annotationProcessor "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
 }
@@ -53,3 +55,8 @@ sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)
+
+shadowJar {
+    // The second string is where you will locate dev.dejvokep.boostedyaml
+    relocate 'dev.dejvokep.boostedyaml', 'me.plugin.libs'
+}

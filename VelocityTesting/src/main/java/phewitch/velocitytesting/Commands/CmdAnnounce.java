@@ -34,7 +34,7 @@ public class CmdAnnounce implements SimpleCommand {
         out.writeUTF(JSONComponentSerializer.json().serialize(msg.build()));
 
         for (RegisteredServer server : VelocityTesting.server.getAllServers()) {
-            var success = server.sendPluginMessage(VelocityTesting.IdfAnnouncement, out.toByteArray());
+            var success = server.sendPluginMessage(VelocityTesting.Channels.Announcement, out.toByteArray());
         }
     }
 

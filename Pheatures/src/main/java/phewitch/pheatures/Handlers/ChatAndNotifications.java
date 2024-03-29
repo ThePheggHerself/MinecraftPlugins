@@ -20,7 +20,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.Nullable;
 import phewitch.pheatures.Pheatures;
 
-public class ChatWelcomeAndTablist implements Listener {
+public class ChatAndNotifications implements Listener {
     // Listen for the AsyncChatEvent
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncChatEvent event) {
@@ -39,7 +39,7 @@ public class ChatWelcomeAndTablist implements Listener {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(json);
 
-        event.getPlayer().sendPluginMessage(Pheatures.Instance, Pheatures.IdfGlobalChat, out.toByteArray());
+        event.getPlayer().sendPluginMessage(Pheatures.Instance, Pheatures.Channels.GlobalChat, out.toByteArray());
         Bukkit.getServer().broadcast(msg);
         event.setCancelled(true);
     }
@@ -68,11 +68,6 @@ public class ChatWelcomeAndTablist implements Listener {
 
             event.joinMessage(message);
         }
-
-        var namePrefixComponent = GetPrefixWithNameComponent(player, null);
-        player.playerListName(namePrefixComponent);
-        player.sendPlayerListHeader(Component.text("You lost the game"));
-        player.sendPlayerListFooter(Component.text("discord.gg/dragoninn").color(NamedTextColor.GOLD));
     }
 
     @EventHandler
@@ -97,7 +92,7 @@ public class ChatWelcomeAndTablist implements Listener {
         return LegacyComponentSerializer.legacyAmpersand().deserialize(metadata.getPrefix() + " ");
     }
 
-    public Component GetPrefixWithNameComponent(Player player, @Nullable CachedMetaData metadata) {
+    public static Component GetPrefixWithNameComponent(Player player, @Nullable CachedMetaData metadata) {
         if (metadata == null) {
             PlayerAdapter<Player> adapter = Pheatures.LuckPermsAPI.getPlayerAdapter(Player.class);
             metadata = adapter.getMetaData(player);
@@ -111,7 +106,7 @@ public class ChatWelcomeAndTablist implements Listener {
                 .build();
     }
 
-    public TextColor GetNameColour(Player player, @Nullable CachedMetaData metadata) {
+    public static TextColor GetNameColour(Player player, @Nullable CachedMetaData metadata) {
         if (metadata == null) {
             PlayerAdapter<Player> adapter = Pheatures.LuckPermsAPI.getPlayerAdapter(Player.class);
             metadata = adapter.getMetaData(player);
