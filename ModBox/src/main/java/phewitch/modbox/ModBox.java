@@ -17,10 +17,7 @@ import phewitch.modbox.Commands.CommandBase.CustomCommand;
 import phewitch.modbox.Commands.CommandBase.IPlayerOnlyCommand;
 import phewitch.modbox.Classes.SqlManager;
 import phewitch.modbox.Commands.ban;
-import phewitch.modbox.EventListeners.ChatNotifications;
-import phewitch.modbox.EventListeners.CommandEventListener;
-import phewitch.modbox.EventListeners.PluginMessages;
-import phewitch.modbox.EventListeners.UpdateTablist;
+import phewitch.modbox.EventListeners.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,22 +26,7 @@ import java.util.Map;
 public final class ModBox extends JavaPlugin {
     public static ModBox Instance;
     public static LuckPerms LuckPermsAPI;
-
     public static Map<String, CustomCommand> CommandMap = new HashMap<>();
-
-    public static MysqlDataSource GetSQLConnection() {
-        var config = Instance.getConfig();
-        var dbConfig = config.getConfigurationSection("database").getValues(false);
-        MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
-
-        dataSource.setServerName(dbConfig.get("host").toString());
-        dataSource.setPort(Integer.parseInt(dbConfig.get("port").toString()));
-        dataSource.setDatabaseName(dbConfig.get("database").toString());
-        dataSource.setUser(dbConfig.get("user").toString());
-        dataSource.setPassword(dbConfig.get("password").toString());
-
-        return dataSource;
-    }
 
     @Override
     public void onEnable() {
@@ -61,11 +43,6 @@ public final class ModBox extends JavaPlugin {
             setEnabled(false);
             return;
         }
-
-        var banCmd = new ban("ban");
-
-        this.getCommand("ban").setExecutor(banCmd);
-        this.getCommand("ban").setTabCompleter(banCmd);
 
         logger.info("Registering plugin message channels");
         if (!RegisterPluginChannels()) {
@@ -85,54 +62,6 @@ public final class ModBox extends JavaPlugin {
         scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 20L  /*<-- the initial delay */, 20L * 3 /*<-- the interval */);
     }
 
-    @Override
-    public void onDisable() {
-    }
-
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
-        var command = getCustomCommand(sender, baseCommand, alias, args);
-
-        return super.onTabComplete(sender, command, alias, args);
-    }
-
-    @Override
-    public boolean onCommand(final CommandSender sender, final Command baseCommand, final String label, final String[] args) {
-        getLogger().info("1111111111111111");
-
-        var command = getCustomCommand(sender, baseCommand, label, args);
-
-        getLogger().info("AAAAAA");
-
-        if ((command instanceof IPlayerOnlyCommand) && !(sender instanceof Player plr)) {
-            sender.sendMessage(Component.text("Only players can run this command").color(NamedTextColor.RED));
-            return false;
-        }
-
-        getLogger().info("BBBBBBBB");
-
-        var perm = command.getPermission();
-        if (perm != null && !sender.hasPermission(perm)) {
-            sender.sendMessage(Component.text("You do not have permission to run this command").color(NamedTextColor.RED));
-            return false;
-        }
-
-        getLogger().info("CCCCCCCCCC");
-
-        var msg = command.hasValidArguments(args);
-
-        getLogger().info("DDDDDDDDD");
-
-        if (msg != null && !msg.isEmpty()) {
-            sender.sendMessage(Component.text(msg).color(NamedTextColor.YELLOW));
-            return false;
-        }
-
-        getLogger().info("EEEEEEEEEE");
-
-        return command.onCommand(sender, baseCommand, label, args);
-    }
-
     public boolean RegisterConfig() {
         var config = this.getConfig();
 
@@ -148,11 +77,10 @@ public final class ModBox extends JavaPlugin {
                 dbConfig.get("database").toString(),
                 dbConfig.get("user").toString(),
                 dbConfig.get("password").toString()
-                );
+        );
 
         return SqlManager.Instance.checkConnection();
     }
-
     public boolean RegisterPluginChannels() {
 
         var messageHandler = new PluginMessages();
@@ -164,6 +92,46 @@ public final class ModBox extends JavaPlugin {
         getServer().getMessenger().registerIncomingPluginChannel(this, Channels.GlobalChat, messageHandler);
 
         return true;
+    }
+    public boolean RegisterEvents() {
+        getServer().getPluginManager().registerEvents(new JoiningAndLeaving(), this);
+        getServer().getPluginManager().registerEvents(new ChatNotifications(), this);
+        getServer().getPluginManager().registerEvents(new CommandEventListener(), this);
+        return true;
+    }
+
+
+
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
+        var command = getCustomCommand(sender, baseCommand, alias, args);
+
+        return super.onTabComplete(sender, command, alias, args);
+    }
+
+    @Override
+    public boolean onCommand(final CommandSender sender, final Command baseCommand, final String label, final String[] args) {
+        var command = getCustomCommand(sender, baseCommand, label, args);
+
+        if ((command instanceof IPlayerOnlyCommand) && !(sender instanceof Player plr)) {
+            sender.sendMessage(Component.text("Only players can run this command").color(NamedTextColor.RED));
+            return false;
+        }
+
+        var perm = command.getPermission();
+        if (perm != null && !sender.hasPermission(perm)) {
+            sender.sendMessage(Component.text("You do not have permission to run this command").color(NamedTextColor.RED));
+            return false;
+        }
+        var msg = command.hasValidArguments(args);
+
+        if (msg != null && !msg.isEmpty()) {
+            sender.sendMessage(Component.text(msg).color(NamedTextColor.YELLOW));
+            return false;
+        }
+
+        return command.onCommand(sender, baseCommand, label, args);
     }
 
     public CustomCommand getCustomCommand(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
@@ -194,13 +162,6 @@ public final class ModBox extends JavaPlugin {
             return null;
         }
     }
-
-    public boolean RegisterEvents() {
-        getServer().getPluginManager().registerEvents(new ChatNotifications(), this);
-        getServer().getPluginManager().registerEvents(new CommandEventListener(), this);
-        return true;
-    }
-
 
     public static class Channels {
         public static final String Announcement = "phewitch:velocityannouncements";

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import phewitch.modbox.Classes.PlayerData;
 import phewitch.modbox.ModBox;
 
 public class UpdateTablist {
@@ -12,7 +13,8 @@ public class UpdateTablist {
 
     public static void Update(){
         for (Player plr : Bukkit.getOnlinePlayers()) {
-            var comp = ChatNotifications.GetPrefixWithNameComponent(plr, null);
+            var comp = PlayerData.getPrefixComponent(plr, null);
+            comp.append(PlayerData.getNameComponent(plr, null));
 
             plr.playerListName(comp.append(Component.text(" " + plr.getPing() + "ms").color(NamedTextColor.AQUA)));
 

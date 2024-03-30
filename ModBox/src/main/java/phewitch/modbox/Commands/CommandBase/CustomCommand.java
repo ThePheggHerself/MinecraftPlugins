@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CustomCommand extends Command implements TabExecutor {
@@ -40,6 +42,30 @@ public class CustomCommand extends Command implements TabExecutor {
         return "Usage: /" + this.getName() + " <" + String.join("> <", this.getArguments()) + ">";
     }
 
+    public String parseArgType(String arg) {
+        switch (arg) {
+            default:
+            case "player": {
+                return "player";
+            }
+            case "amount":
+            case "number": {
+                return "number";
+            }
+            case "x":
+                return "coordx";
+            case "y":
+                return "coordy";
+            case "z":
+                return "coordz";
+            case "reason":
+            case "message":
+            case "string":
+            case "name":
+                return "string";
+        }
+    }
+
     public String hasValidArguments(String[] args) {
         var cmdArgs = this.getArguments();
 
@@ -64,6 +90,10 @@ public class CustomCommand extends Command implements TabExecutor {
 
                     break;
                 }
+                case "string": {
+                    if (args[index].isBlank())
+                        return "Empty string detected at " + index;
+                }
             }
             index++;
         }
@@ -71,41 +101,15 @@ public class CustomCommand extends Command implements TabExecutor {
         return null;
     }
 
-    public String parseArgType(String arg) {
-        switch (arg) {
-            default:
-            case "player": {
-                return "player";
-            }
-            case "amount":
-            case "number": {
-                return "number";
-            }
-            case "x":
-                return "coordx";
-            case "y":
-                return "coordy";
-            case "z":
-                return "coordz";
-            case "reason":
-            case "message":
-            case "string":
-                return "string";
-        }
-    }
-
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         var cmdArgs = this.getArguments();
         var index = args.length - 1;
 
-        Bukkit.getLogger().info("ORANGE " + args.length + " " + cmdArgs.length);
-
         if (args.length > cmdArgs.length)
             return new ArrayList<String>();
 
         var type = parseArgType(cmdArgs[index]);
-        Bukkit.getLogger().info(cmdArgs[index] + " " + args.length + " " + type);
 
         switch (parseArgType(cmdArgs[index])) {
             default:
@@ -121,49 +125,63 @@ public class CustomCommand extends Command implements TabExecutor {
                     add("20");
                 }};
             }
-            case "coordx":{
+            case "coordx": {
                 var response = new ArrayList<String>();
-                if(sender instanceof Player plr){
+                if (sender instanceof Player plr) {
                     response.add(Double.toString(plr.getLocation().x()));
                     response.add("~");
-                }
-                else {
+                } else {
                     response.add("0");
                     response.add("100");
                 }
                 return response;
             }
-            case "coordy":{
+            case "coordy": {
                 var response = new ArrayList<String>();
-                if(sender instanceof Player plr){
+                if (sender instanceof Player plr) {
                     response.add(Double.toString(plr.getLocation().y()));
                     response.add("~");
-                }
-                else {
+                } else {
                     response.add("0");
                     response.add("100");
                 }
                 return response;
             }
-            case "coordz":{
+            case "coordz": {
                 var response = new ArrayList<String>();
-                if(sender instanceof Player plr){
+                if (sender instanceof Player plr) {
                     response.add(Double.toString(plr.getLocation().z()));
                     response.add("~");
-                }
-                else {
+                } else {
                     response.add("0");
                     response.add("100");
                 }
                 return response;
             }
-            case "string":
-            {
-                return new ArrayList<String>() {};
+            case "string": {
+                return new ArrayList<String>() {
+                };
             }
-
         }
+    }
 
+    public String getReasonFromArgs(String[] args, String stringDefault) {
+        List<String> argList = new LinkedList<String>(Arrays.asList(args));
+        argList.remove(0);
+        var str = String.join(" ", argList);
 
+        if(str.isBlank())
+            return stringDefault;
+        else return str;
+    }
+
+    public String getReasonFromArgs(String[] args) {
+        List<String> argList = new LinkedList<String>(Arrays.asList(args));
+        argList.remove(0);
+        var str = String.join(" ", argList);
+
+        if(str.isBlank())
+            return "No reason provided";
+        else return str;
     }
 }
