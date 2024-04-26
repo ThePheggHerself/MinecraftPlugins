@@ -30,11 +30,7 @@ public class unban extends CustomCommand {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        var query = "SELECT * FROM player_bans WHERE player_name = ? OR player_uuid = ? OR player_ip = ? ORDER BY ID DESC";
-        var result = SqlManager.Instance.getFromDatabase(query,
-                new String[]{args[0], args[0], args[0]});
-
-        var banInfo = new BanInfo(result);
+        var banInfo = BanManager.getBan(args[0]);
         if(!banInfo.exists() || banInfo.isUnbanned())
         {
             sender.sendMessage(Component.text()

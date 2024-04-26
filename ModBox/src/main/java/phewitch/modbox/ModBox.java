@@ -1,32 +1,41 @@
 package phewitch.modbox;
 
-import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
-import com.mysql.cj.jdbc.MysqlDataSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
-import org.bukkit.command.*;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.FurnaceRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import phewitch.modbox.Classes.SqlManager;
 import phewitch.modbox.Commands.CommandBase.CustomCommand;
 import phewitch.modbox.Commands.CommandBase.IPlayerOnlyCommand;
-import phewitch.modbox.Classes.SqlManager;
-import phewitch.modbox.Commands.ban;
 import phewitch.modbox.EventListeners.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public final class ModBox extends JavaPlugin {
     public static ModBox Instance;
     public static LuckPerms LuckPermsAPI;
     public static Map<String, CustomCommand> CommandMap = new HashMap<>();
+
+    public static String formatSeconds(int secs) {
+        Date d = new Date(secs * 1000L);
+        SimpleDateFormat df = new SimpleDateFormat("mm:ss"); // HH for 0-23
+        return df.format(d);
+    }
 
     @Override
     public void onEnable() {
@@ -58,6 +67,15 @@ public final class ModBox extends JavaPlugin {
             return;
         }
 
+        logger.info("Registering recipes");
+        if (!RegisterRecipes()) {
+            logger.warning("Unable to register recipes. Plugin will not be loaded");
+            setEnabled(false);
+            return;
+        }
+
+
+
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 20L  /*<-- the initial delay */, 20L * 3 /*<-- the interval */);
     }
@@ -81,6 +99,7 @@ public final class ModBox extends JavaPlugin {
 
         return SqlManager.Instance.checkConnection();
     }
+
     public boolean RegisterPluginChannels() {
 
         var messageHandler = new PluginMessages();
@@ -93,6 +112,7 @@ public final class ModBox extends JavaPlugin {
 
         return true;
     }
+
     public boolean RegisterEvents() {
         getServer().getPluginManager().registerEvents(new JoiningAndLeaving(), this);
         getServer().getPluginManager().registerEvents(new ChatNotifications(), this);
@@ -100,8 +120,21 @@ public final class ModBox extends JavaPlugin {
         return true;
     }
 
+    public boolean RegisterRecipes(){
+        var key = new NamespacedKey(this, "cookedbread");
+        Recipe recipe = new FurnaceRecipe(key , new ItemStack(Material.BREAD, 1), Material.WHEAT, 0, 10 * 20);
+        Bukkit.addRecipe(recipe);
 
+        key = new NamespacedKey(this, "cookedleather");
+        recipe = new FurnaceRecipe(key , new ItemStack(Material.LEATHER, 1), Material.ROTTEN_FLESH, 0, 40 * 20);
+        Bukkit.addRecipe(recipe);
 
+        return true;
+    }
+
+    public boolean RegisterEnchants(){
+        return true;
+    }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command baseCommand, @NotNull String alias, @NotNull String[] args) {
@@ -168,4 +201,41 @@ public final class ModBox extends JavaPlugin {
         public static final String GlobalChat = "phewitch:chatmessage";
         public static final String ServerStatus = "phewitch:serverstatus";
     }
+
+    public static String beautifyString(String string){
+        var arr = string.split("_| ", -2);
+        ArrayList<String> arr2 = new ArrayList<>(){};
+        for (var str : arr)
+            arr2.add(str.substring(0, 1).toUpperCase() + str.substring(1));
+        return String.join (" ", arr);
+    }
+
+    private final static TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+
+    static {
+
+        map.put(1000, "M");
+        map.put(900, "CM");
+        map.put(500, "D");
+        map.put(400, "CD");
+        map.put(100, "C");
+        map.put(90, "XC");
+        map.put(50, "L");
+        map.put(40, "XL");
+        map.put(10, "X");
+        map.put(9, "IX");
+        map.put(5, "V");
+        map.put(4, "IV");
+        map.put(1, "I");
+
+    }
+
+    public final static String toRoman(int number) {
+        int l =  map.floorKey(number);
+        if ( number == l ) {
+            return map.get(number);
+        }
+        return map.get(l) + toRoman(number-l);
+    }
+
 }

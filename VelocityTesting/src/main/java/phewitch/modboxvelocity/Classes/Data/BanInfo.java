@@ -1,14 +1,16 @@
-package phewitch.modbox.Classes.Data;
+package phewitch.modboxvelocity.Classes.Data;
 
+import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.jetbrains.annotations.Nullable;
-import phewitch.modbox.Classes.BanManager;
-import phewitch.modbox.Classes.SqlManager;
+import phewitch.modboxvelocity.Classes.BanManager;
+import phewitch.modboxvelocity.Classes.SqlManager;
+import phewitch.modboxvelocity.ModBoxVelocity;
 
+import java.lang.reflect.Proxy;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,16 +53,24 @@ public class BanInfo {
 
         try {
             CreationTimestamp = Long.parseLong(SqlManager.getResult(resultSet, "ban_timestamp"));
+        } catch (Exception e) {
+        }
+
+        try {
             ExpirationSeconds = Long.parseLong(SqlManager.getResult(resultSet, "expire_timestamp"));
+        } catch (Exception e) {
+        }
+
+        try {
             UnbannedTimestamp = Long.parseLong(SqlManager.getResult(resultSet, "unban_timestamp"));
         } catch (Exception e) {
         }
     }
 
-    public BanInfo(BanInfo info, AsyncPlayerPreLoginEvent event) {
-        Username = event.getPlayerProfile().getName();
-        UUID = event.getPlayerProfile().getId().toString();
-        IpAddress = event.getAddress().toString();
+    public BanInfo(BanInfo info, LoginEvent event) {
+        Username = event.getPlayer().getUsername();
+        UUID = event.getPlayer().getUniqueId().toString();
+        IpAddress = event.getPlayer().getRemoteAddress().toString();
 
         IssuerUsername = info.IssuerUsername;
         IssuerUUID = info.IssuerUUID;
@@ -88,12 +98,12 @@ public class BanInfo {
     }
 
     private void createBanInfo(Player plr, @Nullable Player admin, String reason, @Nullable Long expirationSeconds) {
-        Username = plr.getName();
+        Username = plr.getUsername();
         UUID = plr.getUniqueId().toString();
-        IpAddress = plr.getAddress().getAddress().toString();
+        IpAddress = plr.getRemoteAddress().getAddress().toString();
 
         if (admin != null) {
-            IssuerUsername = admin.getName();
+            IssuerUsername = admin.getUsername();
             IssuerUUID = admin.getUniqueId().toString();
         } else {
             IssuerUsername = "Server Console";

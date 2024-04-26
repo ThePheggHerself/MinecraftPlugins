@@ -109,9 +109,14 @@ public class CustomCommand extends Command implements TabExecutor {
         if (args.length > cmdArgs.length)
             return new ArrayList<String>();
 
+        if(args[index].isBlank())
+            return new ArrayList<String>() {{
+                add("<" + cmdArgs[index] + ">");
+            }};
+
         var type = parseArgType(cmdArgs[index]);
 
-        switch (parseArgType(cmdArgs[index])) {
+        switch (type) {
             default:
             case "player": {
                 return Bukkit.getOnlinePlayers().stream().map(player -> player.getDisplayName()).toList();
@@ -170,18 +175,56 @@ public class CustomCommand extends Command implements TabExecutor {
         argList.remove(0);
         var str = String.join(" ", argList);
 
-        if(str.isBlank())
+        if (str.isBlank())
             return stringDefault;
         else return str;
     }
 
+    public String getReasonFromArgs(String[] args, int startIndex) {
+        List<String> argList = new LinkedList<String>(Arrays.asList(args));
+        argList.subList(startIndex, args.length);
+        var str = String.join(" ", argList);
+
+        if (str.isBlank())
+            return "No reason provided";
+        else return str;
+    }
     public String getReasonFromArgs(String[] args) {
         List<String> argList = new LinkedList<String>(Arrays.asList(args));
         argList.remove(0);
         var str = String.join(" ", argList);
 
-        if(str.isBlank())
+        if (str.isBlank())
             return "No reason provided";
         else return str;
+    }
+
+    public Long getDuration(String str) {
+        var unit = str.replaceAll("\\d", "");
+        Integer amount = 0;
+        try {
+            amount = Integer.parseInt(str.replaceAll("\\D", ""));
+        } catch (Exception e) {
+            return 0L;
+        }
+
+        if (unit.isBlank() || amount == null)
+            return 0L;
+
+        Long hour = 1000L * 60L * 60L;
+        switch (unit)
+        {
+            default:
+            case "h":
+                return hour * amount;
+            case "d":
+                return (hour * 24) * amount;
+            case "w":
+                return (hour * 24 * 7) * amount;
+            case "M":
+                return (hour * 24 * 30) * amount;
+            case "y":
+                return (hour * 24 * 365) * amount;
+        }
     }
 }

@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'eclipse'
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1"
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'phewitch'
@@ -14,15 +14,24 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven {
+        url "https://libraries.minecraft.net"
+    }
 }
 
 dependencies {
-    implementation "dev.dejvokep:boosted-yaml:1.3"
+    compileOnly 'com.mojang:brigadier:1.0.18'
+
+    compileOnly 'org.spongepowered:configurate-yaml:4.0.0'
     compileOnly "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
+
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+    annotationProcessor 'com.mysql:mysql-connector-j:8.3.0'
     annotationProcessor "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
 }
 
-def targetJavaVersion = 11
+def targetJavaVersion = 16
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -58,5 +67,9 @@ project.eclipse.synchronizationTasks(generateTemplates)
 
 shadowJar {
     // The second string is where you will locate dev.dejvokep.boostedyaml
-    relocate 'dev.dejvokep.boostedyaml', 'me.plugin.libs'
+    relocate 'com.mysql:mysql-connector-j:8.3.0', 'me.plugin.mysql'
+}
+
+artifacts {
+    archives shadowJar
 }

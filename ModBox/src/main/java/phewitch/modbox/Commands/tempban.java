@@ -16,9 +16,9 @@ import phewitch.modbox.ModBox;
 
 import java.util.List;
 
-public class ban extends CustomCommand implements IBypassCommand {
+public class tempban extends CustomCommand implements IBypassCommand {
 
-    public ban(@NotNull String name) {
+    public tempban(@NotNull String name) {
         super(name);
     }
 
@@ -29,13 +29,14 @@ public class ban extends CustomCommand implements IBypassCommand {
 
     @Override
     public String[] getArguments() {
-        return new String[]{"player", "reason"};
+        return new String[] { "player", "duration", "reason" };
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         var plr = Bukkit.getPlayer(args[0]);
-        var reason = getReasonFromArgs(args);
+        var reason = getReasonFromArgs(args, 2);
+        var length = getDuration(args[1]);
 
         if (plr.hasPermission(getBypassPermission())) {
             sender.sendMessage(Component.text()
@@ -45,9 +46,7 @@ public class ban extends CustomCommand implements IBypassCommand {
             return false;
         }
 
-
-
-        BanInfo banInfo = new BanInfo(plr, sender instanceof Player admin ? admin : null, reason);
+        BanInfo banInfo = new BanInfo(plr, sender instanceof Player admin ? admin : null, reason, length);
         BanManager.banPlayer(banInfo, plr);
 
         sender.sendMessage(banInfo.getBanMessage());
