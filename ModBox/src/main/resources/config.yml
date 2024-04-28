@@ -9,3 +9,4 @@ database:
 
 server-name: "Survival"
 staffplusplus-compatibility: true
+hardcore-command: true

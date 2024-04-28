@@ -4,7 +4,6 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.event.ResultedEvent.ComponentResult;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -27,7 +26,10 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import phewitch.modboxvelocity.Classes.BanManager;
 import phewitch.modboxvelocity.Classes.Data.BanInfo;
 import phewitch.modboxvelocity.Classes.SqlManager;
-import phewitch.modboxvelocity.Commands.*;
+import phewitch.modboxvelocity.Commands.CmdAnnounce;
+import phewitch.modboxvelocity.Commands.CmdBan;
+import phewitch.modboxvelocity.Commands.CmdCheckBan;
+import phewitch.modboxvelocity.Commands.CmdUnban;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -162,7 +164,10 @@ public class ModBoxVelocity {
 
         var str = in.readUTF();
         var oldMsg = JSONComponentSerializer.json().deserialize(str);
-        var newMessage = ServerIdentifierFromEvent(originInfo).append(oldMsg);
+        var newMessage = Component.text(ServerIdentifierFromEvent(originInfo))
+                .color(NamedTextColor.DARK_GRAY)
+                .hoverEvent(HoverEvent.showText(Component.text("Currently playing on " + originInfo.getName())))
+                .append(oldMsg);
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(JSONComponentSerializer.json().serialize(newMessage));
@@ -193,17 +198,17 @@ public class ModBoxVelocity {
         }
     }
 
-    public Component ServerIdentifierFromEvent(ServerInfo server) {
+    public String ServerIdentifierFromEvent(ServerInfo server) {
         if (server.getName().equals("Survival"))
-            return Component.text("[SV] -> ").color(NamedTextColor.DARK_GRAY).hoverEvent(HoverEvent.showText(Component.text(server.getName())));
+            return "[SV] ";
         else if (server.getName().equals("SkyBlock"))
-            return Component.text("[SB] -> ").color(NamedTextColor.DARK_GRAY).hoverEvent(HoverEvent.showText(Component.text(server.getName())));
+            return "[SB] ";
         else if (server.getName().equals("AcidIsland"))
-            return Component.text("[AI] -> ").color(NamedTextColor.DARK_GRAY).hoverEvent(HoverEvent.showText(Component.text(server.getName())));
+            return "[AI] ";
         else if (server.getName().equals("Creative"))
-            return Component.text("[CP] -> ").color(NamedTextColor.DARK_GRAY).hoverEvent(HoverEvent.showText(Component.text(server.getName())));
-
-        return Component.text("[OT] -> ").color(NamedTextColor.DARK_GRAY).hoverEvent(HoverEvent.showText(Component.text(server.getName())));
+            return "[CP] ";
+        else
+            return "[OT] ";
     }
 
     public static class Channels {

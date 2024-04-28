@@ -15,6 +15,7 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
 }
 
 libsDirName = '../Server/plugins'
@@ -22,7 +23,7 @@ libsDirName = '../Server/plugins'
 dependencies {
     implementation 'com.mysql:mysql-connector-j:8.3.0'
 
-
+    compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
     compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
     compileOnly 'net.luckperms:api:5.4'
 

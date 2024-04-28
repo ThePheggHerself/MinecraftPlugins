@@ -8,11 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.eclipse.sisu.Priority;
-import phewitch.modbox.Classes.BanManager;
-import phewitch.modbox.Classes.Data.BanInfo;
 import phewitch.modbox.Classes.PlayerData;
 import phewitch.modbox.Classes.SqlManager;
 import phewitch.modbox.ModBox;
@@ -21,29 +17,7 @@ import java.text.SimpleDateFormat;
 
 public class JoiningAndLeaving implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerLogin(AsyncPlayerPreLoginEvent event) {
-        if(event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED)
-            return;
-
-        var banInfo = BanManager.getBan(event);
-        if (banInfo.exists() && !banInfo.isUnbanned()) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, banInfo.getBanMessage());
-
-            Bukkit.getScheduler().runTaskLater(ModBox.Instance, new Runnable() {
-                @Override
-                public void run() {
-                    if(!banInfo.UUID.equals(event.getPlayerProfile().getId().toString())){
-                        Bukkit.getLogger().info("Ban found for Address " + event.getAddress() + "! "
-                                + event.getPlayerProfile().getName() + " (" + event.getPlayerProfile().getId() + ") will also be banned!");
-                        BanManager.banPlayer(new BanInfo(banInfo, event), null);
-                    }
-                }
-            }, 10L);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
         var offlinePlayer = Bukkit.getOfflinePlayer(player.getUniqueId());
@@ -69,6 +43,23 @@ public class JoiningAndLeaving implements Listener {
         }
 
         UpdateTablist.Update();
+
+        var serverName = ModBox.Instance.getConfig().get("server-name").toString();
+        var timestamp = ((Long)System.currentTimeMillis()).toString();
+
+        SqlManager.Instance.writeToDatabase("INSERT INTO player_cache (player_name, player_uuid, last_join, last_server, last_address) VALUES (?,?,?,?,?)" +
+                        "ON DUPLICATE KEY UPDATE player_name = ?, last_join = ?, last_server = ?, last_address = ?",
+                new String[]{
+                        player.getName(),
+                        player.getUniqueId().toString(),
+                        timestamp,
+                        serverName,
+                        player.getAddress().getAddress().toString(),
+                        player.getName(),
+                        timestamp,
+                        serverName,
+                        player.getAddress().getAddress().toString()
+                });
     }
 
     @EventHandler

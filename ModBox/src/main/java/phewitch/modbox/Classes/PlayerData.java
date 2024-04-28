@@ -12,14 +12,14 @@ import phewitch.modbox.ModBox;
 
 public class PlayerData {
 
-    public static Component getPrefixComponent(Player player, @Nullable CachedMetaData metadata) {
+    public static Component getPrefixComponent(Player player, @Nullable CachedMetaData metadata, Boolean trim) {
 
         if (metadata == null) {
             PlayerAdapter<Player> adapter = ModBox.LuckPermsAPI.getPlayerAdapter(Player.class);
             metadata = adapter.getMetaData(player);
         }
 
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(metadata.getPrefix());
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(trim ? metadata.getPrefix().trim() : metadata.getPrefix());
     }
 
     public static Component getNameComponent(Player player, @Nullable CachedMetaData metadata) {

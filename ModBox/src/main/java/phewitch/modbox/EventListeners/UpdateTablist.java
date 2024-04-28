@@ -2,6 +2,7 @@ package phewitch.modbox.EventListeners;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.luckperms.api.platform.PlayerAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import phewitch.modbox.Classes.PlayerData;
@@ -12,11 +13,18 @@ public class UpdateTablist {
     public static String ServerName = null;
 
     public static void Update(){
-        for (Player plr : Bukkit.getOnlinePlayers()) {
-            var comp = PlayerData.getPrefixComponent(plr, null);
-            comp.append(PlayerData.getNameComponent(plr, null));
+        PlayerAdapter<Player> adapter = ModBox.LuckPermsAPI.getPlayerAdapter(Player.class);
 
-            plr.playerListName(comp.append(Component.text(" " + plr.getPing() + "ms").color(NamedTextColor.AQUA)));
+        for (Player plr : Bukkit.getOnlinePlayers()) {
+            var metadata = adapter.getMetaData(plr);
+
+            var comp =Component.text()
+                    .append(PlayerData.getPrefixComponent(plr, metadata, false))
+                    .append(PlayerData.getNameComponent(plr, metadata))
+                    .append(Component.text(" " + plr.getPing() + "ms").color(NamedTextColor.AQUA))
+                    .build();
+
+            plr.playerListName(comp);
 
             comp = Component.text()
                     .append(Component.text("Welcome to The Dragon Inn").color(NamedTextColor.AQUA))

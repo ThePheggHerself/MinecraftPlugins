@@ -1,5 +1,7 @@
 package phewitch.modbox;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
@@ -28,6 +30,7 @@ import java.util.*;
 
 public final class ModBox extends JavaPlugin {
     public static ModBox Instance;
+    public static ProtocolManager protocolManager;
     public static LuckPerms LuckPermsAPI;
     public static Map<String, CustomCommand> CommandMap = new HashMap<>();
 
@@ -41,6 +44,8 @@ public final class ModBox extends JavaPlugin {
     public void onEnable() {
         Instance = this;
         var logger = this.getLogger();
+        protocolManager = ProtocolLibrary.getProtocolManager();
+
         @Nullable RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             LuckPermsAPI = provider.getProvider();
@@ -77,7 +82,7 @@ public final class ModBox extends JavaPlugin {
 
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 20L  /*<-- the initial delay */, 20L * 3 /*<-- the interval */);
+        scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 0L  /*<-- the initial delay */, 20L * 1 /*<-- the interval */);
     }
 
     public boolean RegisterConfig() {
@@ -117,6 +122,8 @@ public final class ModBox extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoiningAndLeaving(), this);
         getServer().getPluginManager().registerEvents(new ChatNotifications(), this);
         getServer().getPluginManager().registerEvents(new CommandEventListener(), this);
+        getServer().getPluginManager().registerEvents(new PortalEvents(), this);
+        getServer().getPluginManager().registerEvents(new HardcoreEventListeners(), this);
         return true;
     }
 

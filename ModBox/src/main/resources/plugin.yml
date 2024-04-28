@@ -4,21 +4,7 @@ main: phewitch.modbox.ModBox
 api-version: 1.20
 
 commands:
-  tpa:
-    description: "Sends a request to teleport to another player"
-  tpahere:
-    description: "Sends a request to teleport another player to you"
-  tpaccept:
-    description: "Accepts a pending TP request"
-  tpdeny:
-    description: "Denies a pending TP request"
-  testing:
-    description: "Test command"
-  creative:
-    description: "Sets yourself to Creative"
-  ban:
-    description: "Bans a user from your server"
-  tempban:
-    description: "Temporarily bans a player from the server"
-  unban:
-    description: "Unbans a player from the server"
+  hardcore:
+      description: "Enables hardcore for yourself"
+  revive:
+      description: "Revives another player"

@@ -34,8 +34,6 @@ public class PluginMessages implements PluginMessageListener {
 
             var e = in.readUTF();
 
-            Bukkit.getLogger().info(bytes.length + " " + e);
-
             UpdateTablist.ServerName = e;
 
             UpdateTablist.Update();
