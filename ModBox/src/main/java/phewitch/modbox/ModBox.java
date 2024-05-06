@@ -11,10 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.FurnaceRecipe;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -124,17 +121,47 @@ public final class ModBox extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CommandEventListener(), this);
         getServer().getPluginManager().registerEvents(new PortalEvents(), this);
         getServer().getPluginManager().registerEvents(new HardcoreEventListeners(), this);
+        getServer().getPluginManager().registerEvents(new EntitySpawningEvent(), this);
+
         return true;
     }
 
     public boolean RegisterRecipes(){
-        var key = new NamespacedKey(this, "cookedbread");
-        Recipe recipe = new FurnaceRecipe(key , new ItemStack(Material.BREAD, 1), Material.WHEAT, 0, 10 * 20);
-        Bukkit.addRecipe(recipe);
 
-        key = new NamespacedKey(this, "cookedleather");
-        recipe = new FurnaceRecipe(key , new ItemStack(Material.LEATHER, 1), Material.ROTTEN_FLESH, 0, 40 * 20);
-        Bukkit.addRecipe(recipe);
+        Bukkit.addRecipe(
+                new FurnaceRecipe(
+                        new NamespacedKey(this, "cookedbread"),
+                        new ItemStack(Material.BREAD, 1), Material.WHEAT, 0, 20 * 20));
+
+        Bukkit.addRecipe(
+                new FurnaceRecipe(
+                        new NamespacedKey(this, "cookedleather"),
+                        new ItemStack(Material.LEATHER, 1), Material.ROTTEN_FLESH, 0, 40 * 20));
+
+        Bukkit.addRecipe(
+                new ShapelessRecipe(
+                        new NamespacedKey(this, "glassfrompane"), new ItemStack(Material.GLASS))
+                        .addIngredient(Material.GLASS_PANE)
+                        .addIngredient(Material.GLASS_PANE)
+                        .addIngredient(Material.GLASS_PANE));
+
+        Bukkit.addRecipe(
+                new ShapelessRecipe(
+                        new NamespacedKey(this, "stonefromslab"), new ItemStack(Material.STONE))
+                        .addIngredient(Material.STONE_SLAB)
+                        .addIngredient(Material.STONE_SLAB));
+
+        Bukkit.addRecipe(
+                new ShapelessRecipe(
+                        new NamespacedKey(this, "cobblefromslab"), new ItemStack(Material.COBBLESTONE))
+                        .addIngredient(Material.COBBLESTONE_SLAB)
+                        .addIngredient(Material.COBBLESTONE_SLAB));
+
+        Bukkit.addRecipe(
+                new ShapelessRecipe(
+                        new NamespacedKey(this, "glowsquidsacks"), new ItemStack(Material.GLOW_INK_SAC))
+                        .addIngredient(Material.GLOWSTONE_DUST)
+                        .addIngredient(Material.INK_SAC));
 
         return true;
     }

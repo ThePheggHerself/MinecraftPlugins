@@ -27,7 +27,7 @@ public class PortalEvents implements Listener {
             }
 
             if (event.isCancelled()) ;
-            event.getEntity().sendMessage(Component.text("An ancient power has blocked your portal from creating").color(NamedTextColor.DARK_RED));
+            event.getEntity().sendMessage(Component.text("An ancient power has blocked your portal from being created").color(NamedTextColor.DARK_RED));
         } else if (event.getReason() == PortalCreateEvent.CreateReason.NETHER_PAIR) {
             for (BlockState block : event.getBlocks()) {
                 if (block.getType() == Material.OBSIDIAN) {
@@ -137,12 +137,14 @@ public class PortalEvents implements Listener {
 
                 var replaceBlock = world.getBlockAt(replacePoint);
 
-                if (replaceBlock.getType() == Material.AIR || replaceBlock.getType() == Material.FIRE) {
+                if (replaceBlock.getType() == Material.AIR || replaceBlock.getType() == Material.FIRE || replaceBlock.getType() == Material.SCULK_VEIN) {
                     replaceBlock.setType(Material.NETHER_PORTAL);
 
                     var data = replaceBlock.getBlockData();
-                    data.rotate(StructureRotation.CLOCKWISE_90);
-                    replaceBlock.setBlockData(data);
+                    if(isOnZ) {
+                        data.rotate(StructureRotation.CLOCKWISE_90);
+                        replaceBlock.setBlockData(data);
+                    }
                 }
             }
 

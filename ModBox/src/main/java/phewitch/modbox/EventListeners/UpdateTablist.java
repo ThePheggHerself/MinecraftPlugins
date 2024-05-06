@@ -9,7 +9,6 @@ import phewitch.modbox.Classes.PlayerData;
 import phewitch.modbox.ModBox;
 
 public class UpdateTablist {
-
     public static String ServerName = null;
 
     public static void Update(){
@@ -29,7 +28,11 @@ public class UpdateTablist {
             comp = Component.text()
                     .append(Component.text("Welcome to The Dragon Inn").color(NamedTextColor.AQUA))
                     .append(Component.text("\nCurrent server: ").color(NamedTextColor.GRAY))
-                    .append(Component.text(ModBox.Instance.getConfig().get("server-name").toString() + "\n").color(NamedTextColor.GREEN))
+                    .append(Component.text(ModBox.Instance.getConfig().get("server-name").toString()).color(NamedTextColor.GREEN))
+                    .append(Component.text("\nCurrent players: ").color(NamedTextColor.GRAY))
+                    .append(Component.text(Bukkit.getServer().getOnlinePlayers().size()).color(NamedTextColor.GREEN))
+                    .append(Component.text("/").color(NamedTextColor.GOLD))
+                    .append(Component.text(Bukkit.getServer().getMaxPlayers() + "\n").color(NamedTextColor.GREEN))
                     .build();
 
             plr.sendPlayerListHeader(comp);
@@ -42,5 +45,4 @@ public class UpdateTablist {
             plr.sendPlayerListFooter(comp);
         }
     }
-
 }
