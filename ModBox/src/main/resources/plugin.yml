@@ -4,7 +4,14 @@ main: phewitch.modbox.ModBox
 api-version: 1.20
 
 commands:
-  hardcore:
-      description: "Enables hardcore for yourself"
-  revive:
-      description: "Revives another player"
+  worldspawn:
+      description: "Teleports you to world spawn (Costs 1 XP level)"
+  home:
+      description: "Teleports you to your registered spawn point, aka your bed (Costs 1 ender pearl)"
+permissions:
+  modbox.home.bypass:
+    description: Allows use of the /home command without consuming an ender pearl
+    default: false
+  modbox.spawn.bypass:
+    description: Allows use of the /worldspawn command without consuming 1 level of XP
+    default: false

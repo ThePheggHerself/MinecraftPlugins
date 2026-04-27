@@ -5,40 +5,71 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.structure.StructureRotation;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.world.PortalCreateEvent;
+import phewitch.modbox.ModBox;
 
 public class PortalEvents implements Listener {
 
     @EventHandler
     public void onPortalCreate(PortalCreateEvent event) {
+        //ModBox.Instance.getLogger().info("Logging from another class");
+        //event.getEntity().sendMessage(Component.text("MRROW"));
         if (event.isCancelled())
             return;
 
         if (event.getReason() == PortalCreateEvent.CreateReason.FIRE) {
-            for (BlockState block : event.getBlocks()) {
-                if (block.getType() == Material.OBSIDIAN) {
+            if(event.getWorld().getName().equals("world")){
+                if(event.getEntity() == null || !(event.getEntity() instanceof Player))
                     event.setCancelled(true);
-                }
-            }
 
-            if (event.isCancelled()) ;
-            event.getEntity().sendMessage(Component.text("An ancient power has blocked your portal from being created").color(NamedTextColor.DARK_RED));
-        } else if (event.getReason() == PortalCreateEvent.CreateReason.NETHER_PAIR) {
-            for (BlockState block : event.getBlocks()) {
-                if (block.getType() == Material.OBSIDIAN) {
-                    block.setType(Material.REINFORCED_DEEPSLATE);
+                else{
+                    var adv = Bukkit.getAdvancement(new NamespacedKey("phewitch", "defeatwarlug"));
+                    var plr = (Player)event.getEntity();
+
+                    if(adv == null){
+                        event.getEntity().sendMessage(Component.text("MEOW").color(NamedTextColor.DARK_RED));
+                    }
+                    else{
+                        if(plr.getAdvancementProgress(adv).isDone())
+                        {
+                            //event.getEntity().sendMessage(Component.text(plr.getInventory().getItemInMainHand().getType() + " ").color(NamedTextColor.DARK_RED));
+                            if(plr.getInventory().getItemInMainHand().getType() != Material.FIRE_CHARGE)
+                            {
+                                event.setCancelled(true);
+                                event.getEntity().sendMessage(Component.text("This tool is too weak!").color(NamedTextColor.DARK_RED));
+                            }
+                        }
+                        else {
+                            event.setCancelled(true);
+                            event.getEntity().sendMessage(Component.text("An ancient power is stopping this portal from forming").color(NamedTextColor.DARK_RED));
+                        }
+                    }
                 }
             }
         }
+//        } else if (event.getReason() == PortalCreateEvent.CreateReason.NETHER_PAIR) {
+//            for (BlockState block : event.getBlocks()) {
+//                if (block.getType() == Material.OBSIDIAN) {
+//                    block.setType(Material.REINFORCED_DEEPSLATE);
+//                }
+//            }
+//        }
     }
 
-    @EventHandler
+    //@EventHandler
     public void createFireEvent(BlockPlaceEvent event) {
+        ModBox.Instance.getLogger().info("Logging from another class222");
+        event.getPlayer().sendMessage(Component.text("MRROW"));
+
         if (event.isCancelled() || event.getBlock().getType() != Material.FIRE || event.getBlockAgainst().getType() != Material.REINFORCED_DEEPSLATE)
             return;
 

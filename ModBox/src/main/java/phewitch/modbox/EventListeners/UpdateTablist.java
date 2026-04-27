@@ -26,9 +26,9 @@ public class UpdateTablist {
             plr.playerListName(comp);
 
             comp = Component.text()
-                    .append(Component.text("Welcome to The Dragon Inn").color(NamedTextColor.AQUA))
-                    .append(Component.text("\nCurrent server: ").color(NamedTextColor.GRAY))
-                    .append(Component.text(ModBox.Instance.getConfig().get("server-name").toString()).color(NamedTextColor.GREEN))
+                    .append(Component.text("Nina's funny little SMP").color(NamedTextColor.AQUA))
+                    //.append(Component.text("\nCurrent server: ").color(NamedTextColor.GRAY))
+                    //.append(Component.text(ModBox.Instance.getConfig().get("server-name").toString()).color(NamedTextColor.GREEN))
                     .append(Component.text("\nCurrent players: ").color(NamedTextColor.GRAY))
                     .append(Component.text(Bukkit.getServer().getOnlinePlayers().size()).color(NamedTextColor.GREEN))
                     .append(Component.text("/").color(NamedTextColor.GOLD))
@@ -38,9 +38,8 @@ public class UpdateTablist {
             plr.sendPlayerListHeader(comp);
 
             comp = Component.text()
-                    .append(Component.text("\nJoin our discord at \n").color(NamedTextColor.GRAY))
-                    .append(Component.text("discord.gg/dragoninn").color(NamedTextColor.GOLD))
-                    .build();
+                  .append(Component.text("\nFibsh").color(NamedTextColor.GOLD))
+                  .build();
 
             plr.sendPlayerListFooter(comp);
         }

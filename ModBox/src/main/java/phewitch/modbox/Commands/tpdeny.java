@@ -18,20 +18,23 @@ public class tpdeny extends CustomCommand implements IPlayerOnlyCommand {
     }
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        var plr = (Player) sender;
+        sender.sendMessage(Component.text("Command Disabled").color(NamedTextColor.RED));
+        return false;
 
-        if (!TPRequest.PendingRequests.containsKey(plr.getUniqueId())) {
-            sender.sendMessage(Component.text("You do not have a pending TPA request!").color(NamedTextColor.RED));
-            return false;
-        }
-
-        var request = TPRequest.PendingRequests.get(plr.getUniqueId());
-        var reqSender = Bukkit.getPlayer(request.RequestSender);
-
-        reqSender.sendMessage(Component.text("Your TPA request has been denied").color(NamedTextColor.RED));
-        plr.sendMessage(Component.text("You have denied the TPA request").color(NamedTextColor.RED));
-
-        return true;
+//        var plr = (Player) sender;
+//
+//        if (!TPRequest.PendingRequests.containsKey(plr.getUniqueId())) {
+//            sender.sendMessage(Component.text("You do not have a pending TPA request!").color(NamedTextColor.RED));
+//            return false;
+//        }
+//
+//        var request = TPRequest.PendingRequests.get(plr.getUniqueId());
+//        var reqSender = Bukkit.getPlayer(request.RequestSender);
+//
+//        reqSender.sendMessage(Component.text("Your TPA request has been denied").color(NamedTextColor.RED));
+//        plr.sendMessage(Component.text("You have denied the TPA request").color(NamedTextColor.RED));
+//
+//        return true;
 
     }
 }

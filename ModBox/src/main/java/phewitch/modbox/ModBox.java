@@ -2,16 +2,22 @@ package phewitch.modbox;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.destroystokyo.paper.MaterialSetTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
+import net.playavalon.mythicdungeons.api.MythicDungeonsService;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.MusicInstrument;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Goat;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.FurnaceRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -19,8 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import phewitch.modbox.Classes.SqlManager;
 import phewitch.modbox.Commands.CommandBase.CustomCommand;
+import phewitch.modbox.Commands.CommandBase.IPermissionCommand;
 import phewitch.modbox.Commands.CommandBase.IPlayerOnlyCommand;
 import phewitch.modbox.EventListeners.*;
+
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,13 +63,6 @@ public final class ModBox extends JavaPlugin {
             return;
         }
 
-        logger.info("Registering plugin message channels");
-        if (!RegisterPluginChannels()) {
-            logger.warning("Unable to register commands. Plugin will not be loaded");
-            setEnabled(false);
-            return;
-        }
-
         logger.info("Registering events");
         if (!RegisterEvents()) {
             logger.warning("Unable to register events. Plugin will not be loaded");
@@ -69,14 +70,22 @@ public final class ModBox extends JavaPlugin {
             return;
         }
 
-        logger.info("Registering recipes");
-        if (!RegisterRecipes()) {
-            logger.warning("Unable to register recipes. Plugin will not be loaded");
+        logger.info("Registering plugin message channels");
+        if (!RegisterPluginChannels()) {
+            logger.warning("Unable to register plugin channels. Plugin will not be loaded");
             setEnabled(false);
             return;
         }
 
 
+
+
+//        logger.info("Registering recipes");
+//        if (!RegisterRecipes()) {
+//            logger.warning("Unable to register recipes. Plugin will not be loaded");
+//            setEnabled(false);
+//            return;
+//        }
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(ModBox.Instance, UpdateTablist::Update, 0L  /*<-- the initial delay */, 20L * 1 /*<-- the interval */);
@@ -140,25 +149,6 @@ public final class ModBox extends JavaPlugin {
 
         Bukkit.addRecipe(
                 new ShapelessRecipe(
-                        new NamespacedKey(this, "glassfrompane"), new ItemStack(Material.GLASS))
-                        .addIngredient(Material.GLASS_PANE)
-                        .addIngredient(Material.GLASS_PANE)
-                        .addIngredient(Material.GLASS_PANE));
-
-        Bukkit.addRecipe(
-                new ShapelessRecipe(
-                        new NamespacedKey(this, "stonefromslab"), new ItemStack(Material.STONE))
-                        .addIngredient(Material.STONE_SLAB)
-                        .addIngredient(Material.STONE_SLAB));
-
-        Bukkit.addRecipe(
-                new ShapelessRecipe(
-                        new NamespacedKey(this, "cobblefromslab"), new ItemStack(Material.COBBLESTONE))
-                        .addIngredient(Material.COBBLESTONE_SLAB)
-                        .addIngredient(Material.COBBLESTONE_SLAB));
-
-        Bukkit.addRecipe(
-                new ShapelessRecipe(
                         new NamespacedKey(this, "glowsquidsacks"), new ItemStack(Material.GLOW_INK_SAC))
                         .addIngredient(Material.GLOWSTONE_DUST)
                         .addIngredient(Material.INK_SAC));
@@ -179,17 +169,21 @@ public final class ModBox extends JavaPlugin {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command baseCommand, final String label, final String[] args) {
-        var command = getCustomCommand(sender, baseCommand, label, args);
+        CustomCommand command = getCustomCommand(sender, baseCommand, label, args);
+
+
 
         if ((command instanceof IPlayerOnlyCommand) && !(sender instanceof Player plr)) {
             sender.sendMessage(Component.text("Only players can run this command").color(NamedTextColor.RED));
             return false;
         }
 
-        var perm = command.getPermission();
-        if (perm != null && !sender.hasPermission(perm)) {
-            sender.sendMessage(Component.text("You do not have permission to run this command").color(NamedTextColor.RED));
-            return false;
+        if((command instanceof IPermissionCommand)) {
+            var perm = command.getPermission();
+            if (perm != null && !sender.hasPermission(perm)) {
+                sender.sendMessage(Component.text("You do not have permission to run this command").color(NamedTextColor.RED));
+                return false;
+            }
         }
         var msg = command.hasValidArguments(args);
 
@@ -247,7 +241,6 @@ public final class ModBox extends JavaPlugin {
     private final static TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
     static {
-
         map.put(1000, "M");
         map.put(900, "CM");
         map.put(500, "D");

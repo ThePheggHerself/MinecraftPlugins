@@ -26,24 +26,27 @@ public class hardcore extends CustomCommand implements IPlayerOnlyCommand {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (sender instanceof Player plr) {
-            if(plr.getGameMode() != GameMode.SURVIVAL)
-            {
-                sender.sendMessage(Component.text("You must be in survival to run this command").color(NamedTextColor.YELLOW));
-                return false;
-            }
+        sender.sendMessage(Component.text("Command Disabled").color(NamedTextColor.RED));
+        return false;
 
-            boolean enabled = HardcoreManager.HardcoreEnabled(plr);
-            HardcoreManager.ToggleHardcore(plr, !enabled);
-
-            enabled = HardcoreManager.HardcoreEnabled(plr);
-            sender.sendMessage(Component.text("Hardcore is now ").color(NamedTextColor.YELLOW)
-                    .append(Component.text(enabled ? "ENABLED" : "DISABLED").color(enabled ? NamedTextColor.GREEN : NamedTextColor.RED)));
-
-            return true;
-        } else {
-            sender.sendMessage(Component.text("You must be a player to use this command").color(NamedTextColor.RED));
-            return false;
-        }
+//        if (sender instanceof Player plr) {
+//            if(plr.getGameMode() != GameMode.SURVIVAL)
+//            {
+//                sender.sendMessage(Component.text("You must be in survival to run this command").color(NamedTextColor.YELLOW));
+//                return false;
+//            }
+//
+//            boolean enabled = HardcoreManager.HardcoreEnabled(plr);
+//            HardcoreManager.ToggleHardcore(plr, !enabled);
+//
+//            enabled = HardcoreManager.HardcoreEnabled(plr);
+//            sender.sendMessage(Component.text("Hardcore is now ").color(NamedTextColor.YELLOW)
+//                    .append(Component.text(enabled ? "ENABLED" : "DISABLED").color(enabled ? NamedTextColor.GREEN : NamedTextColor.RED)));
+//
+//            return true;
+//        } else {
+//            sender.sendMessage(Component.text("You must be a player to use this command").color(NamedTextColor.RED));
+//            return false;
+//        }
     }
 }

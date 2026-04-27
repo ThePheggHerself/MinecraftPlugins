@@ -82,7 +82,7 @@ public class ModBoxVelocity {
             return;
         }
 
-        logger.info("Hello there! I made my first plugin with Velocity.");
+        logger.info("Plugin Loaded");
     }
 
     public static String GetReasonFromArgs(String[] args, String stringDefault) {
@@ -102,10 +102,13 @@ public class ModBoxVelocity {
         server.getChannelRegistrar().register(Channels.ServerStatus);
 
         RegisterCommands();
+
+        logger.info("Commands Registered");
     }
 
     public void RegisterCommands() {
         var cmdManager = server.getCommandManager();
+        var cmdmeta
 
         cmdManager.register(cmdManager.metaBuilder("announce").plugin(this).build(), CmdAnnounce.createBrigadierCommand(server));
         cmdManager.register(cmdManager.metaBuilder("ban").plugin(this).build(), CmdBan.createBrigadierCommand(server));
